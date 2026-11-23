@@ -64,7 +64,8 @@
     "prisma@6.19.3": true,
     "@prisma/client@6.19.3": true,
     "@prisma/engines@6.19.3": true,
-    "@parcel/watcher": false
+    "@parcel/watcher": false,
+    "@scarf/scarf": false
   },
   "overrides": {
     "effect": "^3.22.5",
