@@ -8,6 +8,7 @@ describe('Users (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   const http = () => request(app.getHttpServer());
+  const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
 
   beforeAll(async () => {
     ({ app, prisma } = await createTestApp());
@@ -17,15 +18,41 @@ describe('Users (e2e)', () => {
 
   afterAll(() => app.close());
 
-  describe('POST /users/signup', () => {
-    it('creates a user and returns only the id', async () => {
-      const res = await http()
+  describe('Required scenarios', () => {
+    it('[Scenario 1] signup -> login -> GET /users/me with the issued token succeeds', async () => {
+      const signup = await http()
         .post('/users/signup')
         .send({ id: 'alice', password: PASSWORD })
         .expect(201);
-      expect(res.body).toEqual({ id: 'alice' });
+      expect(signup.body).toEqual({ id: 'alice' });
+
+      const login = await http()
+        .post('/users/login')
+        .send({ id: 'alice', password: PASSWORD })
+        .expect(200);
+      const { access_token } = login.body as { access_token: string };
+      expect(access_token).toEqual(expect.any(String));
+
+      const me = await http()
+        .get('/users/me')
+        .set(bearer(access_token))
+        .expect(200);
+      expect(me.body).toEqual({ id: 'alice' });
     });
 
+    it.each([
+      ['GET', () => http().get('/users/me')],
+      ['PUT', () => http().put('/users/me').send({ password: 'new-password' })],
+      ['DELETE', () => http().delete('/users/me')],
+    ])(
+      '[Scenario 3] %s /users/me without a token returns 401',
+      async (_method, call) => {
+        await call().expect(401);
+      },
+    );
+  });
+
+  describe('POST /users/signup', () => {
     it('stores a hash, not the plaintext password', async () => {
       await http()
         .post('/users/signup')
@@ -64,14 +91,6 @@ describe('Users (e2e)', () => {
       http().post('/users/signup').send({ id: 'alice', password: PASSWORD }),
     );
 
-    it('returns an access_token for correct credentials', async () => {
-      const res = await http()
-        .post('/users/login')
-        .send({ id: 'alice', password: PASSWORD })
-        .expect(200);
-      expect(res.body).toEqual({ access_token: expect.any(String) });
-    });
-
     it('returns the same 401 for a wrong password and an unknown id', async () => {
       const wrongPassword = await http()
         .post('/users/login')
@@ -86,31 +105,15 @@ describe('Users (e2e)', () => {
   });
 
   describe('/users/me', () => {
-    it('returns 401 without a token', async () => {
-      await http().get('/users/me').expect(401);
-    });
-
     it('returns 401 for a malformed token', async () => {
-      await http()
-        .get('/users/me')
-        .set('Authorization', 'Bearer not-a-jwt')
-        .expect(401);
-    });
-
-    it('GET returns the current user id only', async () => {
-      const token = await signupAndLogin(app, 'alice');
-      const res = await http()
-        .get('/users/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
-      expect(res.body).toEqual({ id: 'alice' });
+      await http().get('/users/me').set(bearer('not-a-jwt')).expect(401);
     });
 
     it('PUT changes the password: old fails, new works', async () => {
       const token = await signupAndLogin(app, 'alice');
       const res = await http()
         .put('/users/me')
-        .set('Authorization', `Bearer ${token}`)
+        .set(bearer(token))
         .send({ password: 'new-password-456' })
         .expect(200);
       expect(res.body).toEqual({ id: 'alice' });
@@ -129,7 +132,7 @@ describe('Users (e2e)', () => {
       const token = await signupAndLogin(app, 'alice');
       await http()
         .put('/users/me')
-        .set('Authorization', `Bearer ${token}`)
+        .set(bearer(token))
         .send({ id: 'mallory', password: 'new-password-456' })
         .expect(400);
     });
@@ -138,7 +141,7 @@ describe('Users (e2e)', () => {
       const token = await signupAndLogin(app, 'alice');
       await http()
         .put('/users/me')
-        .set('Authorization', `Bearer ${token}`)
+        .set(bearer(token))
         .send({ password: 'short' })
         .expect(400);
     });
@@ -147,19 +150,13 @@ describe('Users (e2e)', () => {
       const token = await signupAndLogin(app, 'alice');
       await http()
         .post('/todos')
-        .set('Authorization', `Bearer ${token}`)
+        .set(bearer(token))
         .send({ title: 'will be deleted' })
         .expect(201);
 
-      await http()
-        .delete('/users/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(204);
+      await http().delete('/users/me').set(bearer(token)).expect(204);
 
-      await http()
-        .get('/users/me')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(401);
+      await http().get('/users/me').set(bearer(token)).expect(401);
       expect(await prisma.user.count()).toBe(0);
       expect(await prisma.todo.count()).toBe(0);
     });

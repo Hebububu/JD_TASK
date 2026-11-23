@@ -39,16 +39,72 @@ describe('Todos (e2e)', () => {
 
   afterAll(() => app.close());
 
-  it('requires authentication on every route', async () => {
-    await http().get('/todos').expect(401);
-    await http().post('/todos').send({ title: 'x' }).expect(401);
-    await http().get('/todos/1').expect(401);
-    await http().get('/todos/search?keyword=x').expect(401);
-    await http().put('/todos/1').send({ title: 'x' }).expect(401);
-    await http().delete('/todos/1').expect(401);
+  describe('Required scenarios', () => {
+    it('[Scenario 2] create -> list -> update -> delete', async () => {
+      // create
+      const created = await http()
+        .post('/todos')
+        .set(as(alice))
+        .send({ title: 'Buy milk', description: '2 liters' })
+        .expect(201);
+      const todo = created.body as TodoBody;
+      expect(todo).toMatchObject({
+        id: expect.any(Number),
+        title: 'Buy milk',
+        description: '2 liters',
+        completed: false,
+        userId: 'alice',
+      });
+
+      // list
+      const list = await http().get('/todos').set(as(alice)).expect(200);
+      expect(list.body).toEqual([expect.objectContaining({ id: todo.id })]);
+
+      // update
+      const updated = await http()
+        .put(`/todos/${todo.id}`)
+        .set(as(alice))
+        .send({ title: 'Buy oat milk', completed: true })
+        .expect(200);
+      expect(updated.body).toMatchObject({
+        id: todo.id,
+        title: 'Buy oat milk',
+        completed: true,
+      });
+
+      // delete
+      await http().delete(`/todos/${todo.id}`).set(as(alice)).expect(204);
+      const afterDelete = await http().get('/todos').set(as(alice)).expect(200);
+      expect(afterDelete.body).toEqual([]);
+    });
+
+    it.each([
+      ['POST /todos', () => http().post('/todos').send({ title: 'x' })],
+      ['GET /todos', () => http().get('/todos')],
+      ['GET /todos/search', () => http().get('/todos/search?keyword=x')],
+      ['GET /todos/:id', () => http().get('/todos/1')],
+      ['PUT /todos/:id', () => http().put('/todos/1').send({ title: 'x' })],
+      ['DELETE /todos/:id', () => http().delete('/todos/1')],
+    ])('[Scenario 3] %s without a token returns 401', async (_route, call) => {
+      await call().expect(401);
+    });
+
+    it.each([
+      ['GET', () => http().get('/todos/999999').set(as(alice))],
+      [
+        'PUT',
+        () => http().put('/todos/999999').set(as(alice)).send({ title: 'x' }),
+      ],
+      ['DELETE', () => http().delete('/todos/999999').set(as(alice))],
+    ])(
+      '[Scenario 4] %s on a nonexistent todo id returns 404',
+      async (_method, call) => {
+        await call().expect(404);
+      },
+    );
   });
 
-  describe('CRUD', () => {
+  describe('CRUD details', () => {
     it('creates with defaults', async () => {
       const todo = await createTodo(alice, { title: 'Buy milk' });
       expect(todo).toMatchObject({
@@ -95,20 +151,10 @@ describe('Todos (e2e)', () => {
       });
     });
 
-    it('deletes', async () => {
+    it('a deleted todo is gone by id too', async () => {
       const todo = await createTodo(alice, { title: 'Buy milk' });
       await http().delete(`/todos/${todo.id}`).set(as(alice)).expect(204);
       await http().get(`/todos/${todo.id}`).set(as(alice)).expect(404);
-    });
-
-    it('returns 404 for a missing todo', async () => {
-      await http().get('/todos/999999').set(as(alice)).expect(404);
-      await http()
-        .put('/todos/999999')
-        .set(as(alice))
-        .send({ title: 'x' })
-        .expect(404);
-      await http().delete('/todos/999999').set(as(alice)).expect(404);
     });
   });
 
