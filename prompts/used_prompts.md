@@ -9,7 +9,7 @@
 
 ## 1. 설계 논의
 
-> 사용한 프롬포트: /office-hours we're gonna implement simple TODO API. use NestJS with TypeScript, Prisma as ORM, and SQLite3 for database, Testing for Jest. Let's constructe basic struct and discuss.
+> 사용한 프롬포트: /office-hours we're gonna implement simple TODO API. use NestJS with TypeScript, Prisma as ORM, and SQLite3 for database, Testing for Jest. Let's construct basic struct and discuss.
 
 AI가 목적을 물어서 "Task for Job Interview"라고 답했고
 구현할 엔드포인트 목록을 다음과 같이 제시했습니다.
