@@ -6,7 +6,7 @@ A small REST API for personal todo lists with JWT authentication.
 
 ## Quick start
 
-Requires Node.js 20+ and npm 11.
+Requires Node.js 20.19+ (or 22.12+) and npm 10+.
 
 ```bash
 npm ci                         # also runs `prisma generate`
