@@ -61,7 +61,7 @@ Validation rules:
 - **Another user's todo returns 404, not 403.** Every todo query is filtered by the caller's id, and update and delete use `updateMany`/`deleteMany` with `{ id, userId }`. A todo you don't own is indistinguishable from one that doesn't exist.
 - **Deleting an account deletes its todos** (`onDelete: Cascade`). The JWT strategy loads the user on every request, so a deleted user's token stops working at once.
 - **`PUT /todos/:id` is a partial update.** Omitted fields keep their values.
-- **`/todos/search` is declared before `/todos/:id`**, otherwise Nest would treat "search" as an id. It matches `title` or `description` and ignores ASCII letter case (SQLite `LIKE`). The keyword is trimmed and must not be empty.
+- **`/todos/search` is declared before `/todos/:id`**, otherwise Nest would treat "search" as an id. It matches the `title` only, as the spec defines, and ignores ASCII letter case (SQLite `LIKE`). The keyword is trimmed and must not be empty.
 - **Passwords never leave `UsersService`.** Every query that returns a user selects only `{ id }`. Passwords are hashed with bcrypt (`bcryptjs`, pure JS, so `npm ci` needs no native build).
 - **Login gives the same 401 for a wrong password and an unknown id.** It also runs a bcrypt compare in both cases, so response time doesn't reveal which ids exist.
 - **Access token only.** There are no refresh tokens. Changing the password doesn't revoke tokens already issued; they stay valid until they expire (`JWT_EXPIRES_IN`). Changing the password doesn't ask for the current one.

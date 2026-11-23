@@ -46,17 +46,11 @@ describe('TodosService', () => {
     );
   });
 
-  it('search scopes by owner and matches title or description', async () => {
+  it('search scopes by owner and matches the title only', async () => {
     await service.search('alice', 'milk');
     expect(prisma.todo.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
-          userId: 'alice',
-          OR: [
-            { title: { contains: 'milk' } },
-            { description: { contains: 'milk' } },
-          ],
-        },
+        where: { userId: 'alice', title: { contains: 'milk' } },
       }),
     );
   });

@@ -37,15 +37,10 @@ export class TodosService {
     return todo;
   }
 
+  /** Searches by title only, as the spec defines. */
   search(userId: string, keyword: string) {
     return this.prisma.todo.findMany({
-      where: {
-        userId,
-        OR: [
-          { title: { contains: keyword } },
-          { description: { contains: keyword } },
-        ],
-      },
+      where: { userId, title: { contains: keyword } },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
   }

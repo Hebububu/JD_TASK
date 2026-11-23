@@ -72,7 +72,7 @@ export class TodosController {
   @ApiOperation({
     summary: 'Search my todos',
     description:
-      'Matches the keyword in title or description, ignoring ASCII letter case.',
+      'Matches the keyword in the title, ignoring ASCII letter case.',
   })
   @ApiOkResponse({ type: [TodoResponseDto] })
   @ApiBadRequestResponse({
