@@ -9,12 +9,12 @@
 
 ## 1. 설계 논의
 
-> 사용한 프롬포트: /office-hours we're gonna implement simple TODO API. use NestJS with TypeScript, Prisma as ORM, and SQLite3 for database, Testing for Jest. Let's construct basic struct and discuss.
+> 사용한 프롬프트: /office-hours we're gonna implement simple TODO API. use NestJS with TypeScript, Prisma as ORM, and SQLite3 for database, Testing for Jest. Let's construct basic struct and discuss.
 
 AI가 목적을 물어서 "Task for Job Interview"라고 답했고
 구현할 엔드포인트 목록을 다음과 같이 제시했습니다.
 
-> 사용한 프롬포트: This is the API endpoints that we should implement
+> 사용한 프롬프트: This is the API endpoints that we should implement
 ```
 USER SCOPE API
 POST /users/signup
@@ -44,13 +44,13 @@ DELETE /todos/{id}
     4. 비밀번호를 응답에서 빼는 방법이 정해져 있지 않습니다.
   - 이 네 가지를 설계에 반영했습니다.
 - **수정 지시:**
-  > 1. 사용한 프롬포트: add Prettier setup as minimal as possible 2. about user data, use id and password field only.
+  > 1. 사용한 프롬프트: add Prettier setup as minimal as possible 2. about user data, use id and password field only.
   - 포매팅을 위한 Prettier를 적용하고, 간단한 설정을 넣었습니다.
   - 사용자 모델을 `{ id, password }`로 줄였습니다. 이 "id"가 로그인 아이디인지 숫자 키인지 AI가 다시 물어서, "사용자가 정하는 로그인 아이디, 가입 후 변경 불가"로 확정했습니다.
 
 ## 2. 구현
 
-> 사용한 프롬포트: Start scaffolding
+> 사용한 프롬프트: Start scaffolding
 
 - **AI가 먼저 찾아 알려 준 문제:**
   - NestJS 12 CLI는 기본값이 ESM + Vitest라서, Jest를 쓰기 위해 `--type cjs`로 생성했습니다.
@@ -64,7 +64,7 @@ DELETE /todos/{id}
 
 ## 3. Swagger 문서화
 
-> 사용한 프롬포트: add @nestjs/swagger module and apply
+> 사용한 프롬프트: add @nestjs/swagger module and apply
 
 - **배경:** 설계 논의에서 Swagger(`/docs`) 문서화를 포함하기로 했습니다. 그런데 구현이 끝난 뒤 확인해 보니, 문서화 코드는 제대로 작성되지 않은 상태였습니다. 설계대로 구현되지 않은 부분이라 이를 지적했습니다.
 - **결과:** AI가 응답 DTO(`UserResponseDto`, `TodoResponseDto` 등), 엔드포인트별 설명, 엔드포인트별 에러 응답(400/401/404/409)을 추가했습니다.
@@ -78,7 +78,7 @@ DELETE /todos/{id}
 
 ## 4. 필수 테스트 시나리오 정리
 
-> 사용한 프롬포트: let's fix some of @test/users.e2e-spec.ts tests. reorganize test as described the photo
+> 사용한 프롬프트: let's fix some of @test/users.e2e-spec.ts tests. reorganize test as described the photo
 
 과제 문서의 "테스트 (필수)" 부분을 캡처해서 함께 보냈습니다.
 
@@ -90,7 +90,7 @@ DELETE /todos/{id}
 
 ## 5. 과제 문서 전체와 대조 (QA)
 
-> 사용한 프롬포트: /qa now i'll provide full document of the task, check current codebase has been implemented propery. (ignore other requirements beyond code)
+> 사용한 프롬프트: /qa now i'll provide full document of the task, check current codebase has been implemented propery. (ignore other requirements beyond code)
 
 과제 문서 전문을 붙여 넣었습니다.
 
@@ -98,22 +98,22 @@ DELETE /todos/{id}
 - **발견 1:** 선택 사항인 검색이 과제에는 "제목으로 검색"인데, 구현은 설명(description)까지 검색하고 있었습니다.
   - 먼저 이 버그 때문에 실패하는 테스트를 만들고, 수정한 뒤 통과하는 것을 확인했습니다.
 - **발견 2:** README의 버전 요구사항이 부정확했습니다.
-  > 사용한 프롬포트: Yes, fix it
+  > 사용한 프롬프트: Yes, fix it
   - "Node.js 20+, npm 11" → "Node.js 20.19+, npm 10+"로 고쳤습니다. 의존성이 실제로 요구하는 버전을 읽어서 확인했고, npm 10으로 설치와 테스트를 직접 돌려 봤습니다.
 - **정리:**
-  > 사용한 프롬포트: delete qa annotation and commit.
+  > 사용한 프롬프트: delete qa annotation and commit.
   - QA가 테스트 코드에 남긴 주석을 지웠습니다.
 
 ## 6. README 정리
 
-> 사용한 프롬포트: translate @README.md as korean, and apply principle on the photo. content of README.md should only contain what the task requirement document says.
+> 사용한 프롬프트: translate @README.md as korean, and apply principle on the photo. content of README.md should only contain what the task requirement document says.
 
 - **결과:** 과제가 요구한 네 항목(선택한 스택, 실행 방법, 테스트 실행 방법, API 목록 요약)만 남기고 한국어로 다시 썼습니다.
 - **검증:** AI가 처음에는 "e2e 테스트는 아무 준비 없이 바로 실행된다"고 썼습니다. 새 clone에서 확인해 보니 `npm ci`는 먼저 필요해서, 문장을 고치고 `npm ci`만 실행한 상태에서 테스트 전체가 통과하는 것을 확인했습니다.
 
 ## 7. `npm ci` 보안 경고
 
-> 사용한 프롬포트: check the issue when i try to npm ci, there's security warnings.
+> 사용한 프롬프트: check the issue when i try to npm ci, there's security warnings.
 
 - **원인:** 경고 27건은 모두 개발·CLI 도구에서 나왔습니다. 실행 중인 API 코드와는 관련이 없습니다.
 - **되돌린 것:** 작업 트리에 `npm audit fix --force` 방식의 변경이 적용되어 있었습니다. 이 변경은 Prisma CLI를 7로 올려 클라이언트(6)와 버전을 어긋나게 했고, Jest를 29로 내렸으며, high 경고 4건은 그대로 남겼습니다. 그래서 커밋된 상태로 되돌렸습니다.
@@ -122,13 +122,13 @@ DELETE /todos/{id}
   - 취약한 하위 의존성은 `overrides`로 패치 버전을 지정했습니다.
 - **결과:** npm 11과 npm 10 모두에서 `found 0 vulnerabilities`이고, 빌드·테스트·커버리지가 통과했습니다.
 - **후속 질문:**
-  > 1. 사용한 프롬포트: Prisma can be updated. should i update it? 2. what's the meaning of @scarf package is not covered by allowScripts
+  > 1. 사용한 프롬프트: Prisma can be updated. should i update it? 2. what's the meaning of @scarf package is not covered by allowScripts
   - Prisma 업데이트 안내는 정식 버전이 아닌 RC(`8.0.0-rc`)여서 업데이트하지 않았습니다.
   - `@scarf/scarf` 경고는 이전 단계에서 AI가 해당 설정을 잘못 지워서 생긴 것이었습니다. 원복한 뒤 경고가 사라진 것을 확인했습니다.
 
 ## 8. 커밋
 
-> 사용한 프롬포트: Commit current worktree changes with conventional commit message
+> 사용한 프롬프트: Commit current worktree changes with conventional commit message
 
 단계마다 변경 내용과 이유를 담은 메시지로 커밋하게 했습니다. 커밋 전에는 매번 `git status`로 의도하지 않은 파일이 없는지 확인했습니다.
 
