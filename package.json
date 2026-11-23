@@ -7,7 +7,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "deploy": "nest deploy",
     "postinstall": "prisma generate",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -41,7 +40,6 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",
-    "@nestjs/mau": "^0.2.6",
     "@nestjs/schematics": "^12.0.0",
     "@nestjs/testing": "^12.0.1",
     "@types/express": "^5.0.0",
@@ -66,7 +64,12 @@
     "prisma@6.19.3": true,
     "@prisma/client@6.19.3": true,
     "@prisma/engines@6.19.3": true,
-    "@scarf/scarf": false,
     "@parcel/watcher": false
+  },
+  "overrides": {
+    "effect": "^3.22.5",
+    "deepmerge-ts": "^8.0.2",
+    "glob": "^14.0.6",
+    "minimatch": "^11.0.9"
   }
 }
