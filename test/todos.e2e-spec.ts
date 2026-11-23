@@ -195,9 +195,6 @@ describe('Todos (e2e)', () => {
   });
 
   describe('GET /todos/search', () => {
-    // Regression: ISSUE-001 — search matched description; the spec says title only
-    // Found by /qa on 2026-11-23
-    // Report: .gstack/qa-reports/run-20261123T052118Z/qa-report-todo-api-2026-11-23.md
     it('matches the title only, not the description', async () => {
       await createTodo(alice, { title: 'Buy milk' });
       await createTodo(alice, {
